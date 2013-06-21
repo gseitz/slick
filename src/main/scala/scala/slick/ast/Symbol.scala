@@ -72,6 +72,16 @@ trait DefNode extends Node {
   }
   final def nodeMapGenerators(f: Symbol => Symbol): Node =
     mapOrNone(nodeGenerators.map(_._1))(f).fold[Node](this) { s => nodeRebuildWithGenerators(s.toIndexedSeq) }
+
+  def nodeWithComputedType3( childrenPreservedType:Boolean, retype:Boolean, newNode: =>Self, newType:Type ) : Self = {
+    if(!nodeHasType || retype) {
+      if(childrenPreservedType && newType == nodeType) (this:Self)
+      else newNode.nodeTyped(newType)
+    } else {
+      if(childrenPreservedType) (this:Self)
+      else newNode.nodeTyped(nodeType)
+    }
+  }
 }
 
 /** A Node which references a Symbol. */

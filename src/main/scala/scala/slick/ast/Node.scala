@@ -367,14 +367,8 @@ final case class GroupBy(fromGen: Symbol, from: Node, by: Node) extends BinaryNo
     val fromType = fr2.nodeType.asCollectionType
     val b = by
     val b2 = b.nodeWithComputedType(scope + (fromGen -> fromType.elementType), typeChildren, retype)
-    if(!nodeHasType || retype) {
-      val newType = CollectionType(fromType.cons, ProductType(IndexedSeq(b2.nodeType, CollectionType(CollectionTypeConstructor.default, fromType.elementType))))
-      if((fr eq fr2) && (b eq b2) && newType == nodeType) this
-      else copy(from = fr2, by = b2).nodeTyped(newType)
-    } else {
-      if((fr eq fr2) && (b eq b2)) this
-      else copy(from = fr2, by = b2).nodeTyped(nodeType)
-    }
+    val newType = CollectionType(fromType.cons, ProductType(IndexedSeq(b2.nodeType, CollectionType(CollectionTypeConstructor.default, fromType.elementType))))
+    nodeWithComputedType3( (fr eq fr2) && (b eq b2), retype, copy(from = fr2, by = b2), newType )
   }
 }
 
@@ -413,14 +407,8 @@ final case class Join(leftGen: Symbol, rightGen: Symbol, left: Node, right: Node
     val lt = l2.nodeType.asCollectionType
     val rt = r2.nodeType.asCollectionType
     val o2 = on.nodeWithComputedType(scope + (leftGen -> lt.elementType) + (rightGen -> rt.elementType), typeChildren, retype)
-    if(!nodeHasType || retype) {
-      val tpe = CollectionType(lt.cons, ProductType(IndexedSeq(lt.elementType, rt.elementType)))
-      if((l2 eq left) && (r2 eq right) && (o2 eq on) && tpe == nodeType) this
-      else copy(left = l2, right = r2, on = o2).nodeTyped(tpe)
-    } else {
-      if((l2 eq left) && (r2 eq right) && (o2 eq on)) this
-      else copy(left = l2, right = r2, on = o2).nodeTyped(nodeType)
-    }
+    val newType = CollectionType(lt.cons, ProductType(IndexedSeq(lt.elementType, rt.elementType)))
+    nodeWithComputedType3( (l2 eq left) && (r2 eq right) && (o2 eq on), retype, copy(left = l2, right = r2, on = o2), newType )
   }
 }
 
@@ -451,14 +439,8 @@ final case class Bind(generator: Symbol, from: Node, select: Node) extends Binar
     val f2 = from.nodeWithComputedType(scope, typeChildren, retype)
     val fromType = f2.nodeType.asCollectionType
     val s2 = select.nodeWithComputedType(scope + (generator -> fromType.elementType), typeChildren, retype)
-    if(!nodeHasType || retype) {
-      val newType = CollectionType(fromType.cons, s2.nodeType.asCollectionType.elementType)
-      if((f2 eq from) && (s2 eq select) && newType == nodeType) this
-      else copy(from = f2, select = s2).nodeTyped(newType)
-    } else {
-      if((f2 eq from) && (s2 eq select)) this
-      else copy(from = f2, select = s2).nodeTyped(nodeType)
-    }
+    val newType = CollectionType(fromType.cons, s2.nodeType.asCollectionType.elementType)
+    nodeWithComputedType3( (f2 eq from) && (s2 eq select), retype, copy(from = f2, select = s2), newType )
   }
 }
 
@@ -478,13 +460,7 @@ final case class TableExpansion(generator: Symbol, table: Node, columns: Node) e
   def nodeWithComputedType2(scope: SymbolScope, typeChildren: Boolean, retype: Boolean): Self = {
     val t2 = table.nodeWithComputedType(scope, typeChildren, retype)
     val c2 = columns.nodeWithComputedType(scope + (generator -> t2.nodeType.asCollectionType.elementType), typeChildren, retype)
-    if(!nodeHasType || retype) {
-      if((t2 eq table) && (c2 eq columns) && t2.nodeType == nodeType) this
-      else copy(table = t2, columns = c2).nodeTyped(t2.nodeType)
-    } else {
-      if((t2 eq table) && (c2 eq columns)) this
-      else copy(table = t2, columns = c2).nodeTyped(nodeType)
-    }
+    nodeWithComputedType3( (t2 eq table) && (c2 eq columns), retype, copy(table = t2, columns = c2), t2.nodeType )
   }
 }
 

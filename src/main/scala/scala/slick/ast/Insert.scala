@@ -13,13 +13,6 @@ final case class Insert(generator: Symbol, table: Node, map: Node, linear: Node)
   def nodeWithComputedType2(scope: SymbolScope, typeChildren: Boolean, retype: Boolean): Self = {
     val t2 = table.nodeWithComputedType(scope, typeChildren, retype)
     val m2 = map.nodeWithComputedType(scope + (generator -> t2.nodeType), typeChildren, retype)
-    if(!nodeHasType || retype) {
-      val newType = m2.nodeType
-      if((t2 eq table) && (m2 eq map) && newType == nodeType) this
-      else copy(table = t2, map = m2).nodeTyped(newType)
-    } else {
-      if((t2 eq table) && (m2 eq map)) this
-      else copy(table = t2, map = m2).nodeTyped(nodeType)
-    }
+    nodeWithComputedType3( (t2 eq table) && (m2 eq map), retype, copy(table = t2, map = m2), m2.nodeType )
   }
 }

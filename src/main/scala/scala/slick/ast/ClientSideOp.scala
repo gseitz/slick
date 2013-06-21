@@ -58,13 +58,7 @@ final case class ResultSetMapping(generator: Symbol, from: Node, map: Node) exte
         val s2 = map.nodeWithComputedType(scope + (generator -> t), typeChildren, retype)
         (s2, s2.nodeType)
     }
-    if(!nodeHasType || retype) {
-      if((f2 eq from) && (s2 eq map) && newType == nodeType) this
-      else copy(from = f2, map = s2).nodeTyped(newType)
-    } else {
-      if((f2 eq from) && (s2 eq map)) this
-      else copy(from = f2, map = s2).nodeTyped(nodeType)
-    }
+    nodeWithComputedType3( (f2 eq from) && (s2 eq map), retype, copy(from = f2, map = s2), newType )
   }
   def nodeMapServerSide(keepType: Boolean, r: Node => Node) = {
     val this2 = nodeMapScopedChildren {
