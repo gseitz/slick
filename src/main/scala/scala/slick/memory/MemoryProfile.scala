@@ -28,6 +28,7 @@ trait MemoryProfile extends MemoryQueryingProfile { driver: MemoryDriver =>
 
   def createQueryExecutor[R](tree: Node, param: Any): QueryExecutor[R] = new QueryExecutorDef[R](tree, param)
   def createInsertInvoker[T](tree: scala.slick.ast.Node): InsertInvoker[T] = new InsertInvokerDef[T](tree)
+  def createDDLInvoker(sd: SchemaDescription): DDLInvoker = ???
   def buildSequenceSchemaDescription(seq: Sequence[_]): SchemaDescription = ???
   def buildTableSchemaDescription(table: Table[_]): SchemaDescription = new TableDDL(table)
 
@@ -67,7 +68,7 @@ trait MemoryProfile extends MemoryQueryingProfile { driver: MemoryDriver =>
       values.foreach(this += _)
   }
 
-  abstract class DDL extends SchemaDescriptionDef with DDLInvoker { self =>
+  abstract class DDL extends SchemaDescriptionDef with DDLInvokerDef { self =>
     def ++(other: SchemaDescription): SchemaDescription = {
       val d = Implicit.ddlToDDLInvoker(other)
       new DDL {
